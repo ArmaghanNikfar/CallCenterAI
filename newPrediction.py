@@ -1,0 +1,83 @@
+import numpy as np
+import pandas as pd
+from keras._tf_keras.keras.models import load_model
+
+# Read new data from Excel
+try:
+    new_data = pd.read_excel('1401calls.xlsx')
+    new_hours = new_data['Hour'].values
+    new_dates = new_data['Date'].values
+    new_calls = new_data['Calls'].values
+    new_is_ramadan = new_data['IsRamadan'].values
+    new_is_eid = new_data['IsEidNowrooz'].values
+    new_is_moharam = new_data['IsMoharam'].values
+    new_in_nationalHoliday = new_data['IsNationalHoliday'].values
+    new_is_day_off = new_data['ItsDayOff'].values
+except Exception as e:
+    print(f"Error reading Excel file: {e}")
+    exit()
+
+def predict_calls_and_agents(dates, hours, calls, is_ramadan, is_eid,is_moharam , is_national_holiday,is_day_off, model_path='prediction_model.h5'):
+    hours_excel = []
+    agencies_excel = []
+    predicted_calls_list = []
+
+    try:
+        # Load the saved model
+        model = load_model(model_path)
+    except Exception as e:
+        print(f"Error loading model: {e}")
+        return pd.DataFrame()
+
+    average_calls_per_agent = 5
+
+    for date, hour, call, ramadan, eid , moharam , national_holiday , day_off in zip(dates, hours, calls, is_ramadan, is_eid , is_moharam , is_national_holiday , is_day_off):
+        # Prepare the input for prediction
+        prediction_input = np.array([[hour, call, ramadan, eid , moharam , national_holiday , day_off]]).astype(np.float32)
+        prediction_input = prediction_input.reshape(1, 1, prediction_input.shape[1])  # Reshape for sequence input
+
+        # Predict using the trained model
+        try:
+            predicted_call = model.predict(prediction_input, verbose=0)
+        except Exception as e:
+            print(f"Error predicting calls: {e}")
+            predicted_call = 0
+        rounded_calls = int(predicted_call)
+        predicted_calls_list.append(rounded_calls)
+
+        for i in predicted_calls_list :
+         if i < 9 :
+            predicted_agents = 4
+        else:
+            predicted_agents = i / average_calls_per_agent
+        
+        # Ensure a minimum of 4 agents
+        rounded_agents = int(predicted_agents)
+
+        print(f"Date: {date}, Hour: {hour}, Predicted agents needed: {int(predicted_agents)}, Predicted calls: {int(predicted_call)}")
+        
+        hours_excel.append(hour)
+        agencies_excel.append(rounded_agents)
+
+    result_df = pd.DataFrame({
+        'Date': dates,
+        'Hours': hours_excel,
+        'Predicted Calls': predicted_calls_list,
+        'Agencies': agencies_excel
+    })
+    
+    return result_df
+
+# Predict and print for new data
+print("\nNew Predictions:")
+new_result = predict_calls_and_agents(new_dates, new_hours, new_calls, new_is_ramadan, new_is_eid , new_is_moharam , new_in_nationalHoliday, new_is_day_off)
+
+if not new_result.empty:
+    try:
+        # Export new results to Excel
+        new_result.to_excel('NewPredictedAgencies.xlsx', index=False)
+        print("New predictions have been saved to 'NewPredictedAgencies.xlsx'")
+    except Exception as e:
+        print(f"Error saving Excel file: {e}")
+else:
+    print("No results to save.")
