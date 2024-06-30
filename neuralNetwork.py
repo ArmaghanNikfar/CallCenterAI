@@ -42,3 +42,4 @@ is_day_off = data['ItsDayOff'].values
 train_and_save_model(dates, hours, calls, is_ramadan, is_eid, is_moharam , is_national_holiday,is_day_off)
 #Negin is online
 print("Negin")
+print('mot is ONLINE')
