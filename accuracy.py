@@ -2,17 +2,18 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from keras._tf_keras.keras.models import load_model
+import matplotlib.pyplot as plt
 
 # Read predicted and actual calls from Excel files
 try:
-    predicted_data = pd.read_excel('1402PredictedWithFeatures.xlsx')
+    predicted_data = pd.read_excel('Finnal1403BLSTMPrediction.xlsx')
     real_data = pd.read_excel('Incoming1402pure.xlsx')
     model = load_model('prediction_model.h5')
 
     # Ensure the data is sorted and aligned properly by date and hour if necessary
     predicted_data = predicted_data.sort_values(by=['Date', 'Hours'])
     real_data = real_data.sort_values(by=['Date', 'Hours'])
-    
+    hours = real_data['Hours'].values
     # Extract the calls columns
     predicted_calls = predicted_data['Predicted Calls'].values
     real_calls = real_data['Calls'].values
@@ -40,7 +41,15 @@ try:
     print(f"Accuracy: {accuracy:.2f}%")
 
 
-
+ # Plot the predicted and real calls
+    plt.figure(figsize=(14, 7))
+    plt.plot(predicted_calls, label='Predicted Calls', color='blue',linestyle='-',linewidth=1)
+    plt.plot(real_calls, label='Real Calls', color='green',linestyle='-',linewidth=1)
+    plt.xticks([])  # Hide x-axis values
+    plt.yticks([])  # Hide y-axis values
+    plt.title('Predicted vs Real Calls')
+    plt.legend()
+    plt.show()
 
 except Exception as e:
     print(f"Error processing Excel files: {e}")

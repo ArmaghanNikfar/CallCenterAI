@@ -1,11 +1,25 @@
 import pandas as pd
+from datetime import datetime
 
+df = pd.read_excel('1402BLSTMPrediction.xlsx')
+dates = df['Date'].values
+
+def revertDates(date_str):
+    if pd.isna(date_str):
+        return date_str
+    # تبدیل به رشته
+    date_str = str(date_str)
+    # تبدیل رشته به شیء datetime و سپس به فرمت جدید
+    date_obj = datetime.strptime(date_str, "%m/%d/%Y")
+    return date_obj.strftime("%Y/%m/%d")
+
+
+
+revertDates(dates)
 # خواندن داده ها از فایل اکسل
-df = pd.read_excel('excel.xlsx')
 
 # تقسیم متن بر اساس کاما و انتخاب مقدار مورد نظر
-df['new2'] = df['A1'].apply(lambda x: x.split(',')[2])
+df.to_excel('converted_dates_excel.xlsx', index=False)
 
 
-# ذخیره داده ها در فایل اکسل
-df.to_excel('split.xlsx', index=False)
+

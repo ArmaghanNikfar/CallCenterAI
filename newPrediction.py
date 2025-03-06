@@ -4,15 +4,16 @@ from keras._tf_keras.keras.models import load_model
 
 # Read new data from Excel
 try:
-    new_data = pd.read_excel('1401calls.xlsx')
-    new_hours = new_data['Hour'].values
+    new_data = pd.read_excel('1402To1403ChangeyearAndSetFeatures.xlsx')
+    new_hours = new_data['Hours'].values
     new_dates = new_data['Date'].values
-    new_calls = new_data['Calls'].values
-    new_is_ramadan = new_data['IsRamadan'].values
-    new_is_eid = new_data['IsEidNowrooz'].values
-    new_is_moharam = new_data['IsMoharam'].values
-    new_in_nationalHoliday = new_data['IsNationalHoliday'].values
-    new_is_day_off = new_data['ItsDayOff'].values
+    new_calls = new_data['Predicted Calls'].values
+    new_is_ramadan = new_data['Isramadan'].values
+    new_is_eid = new_data['Isnowruz'].values
+    new_is_moharam = new_data['Ismoharam'].values
+    new_in_nationalHoliday = new_data['Isnationalholiday'].values
+    new_is_day_off = new_data['Isreligiousholidays'].values
+    
 except Exception as e:
     print(f"Error reading Excel file: {e}")
     exit()
@@ -36,7 +37,7 @@ def calculate_agents(call_volume):
 
     return int(total_required_agents)
 
-def predict_calls_and_agents(dates, hours, calls, is_ramadan, is_eid, is_moharam, is_national_holiday, is_day_off, model_path='prediction_model.h5'):
+def predict_calls_and_agents(dates, hours, calls, is_ramadan, is_eid, is_moharam, is_national_holiday, is_day_off, model_path='prediction_BLSTMmodel.h5'):
     hours_excel = []
     agencies_excel = []
     predicted_calls_list = []
@@ -48,7 +49,7 @@ def predict_calls_and_agents(dates, hours, calls, is_ramadan, is_eid, is_moharam
         print(f"Error loading model: {e}")
         return pd.DataFrame()
 
-    for date, hour, call, ramadan, eid, moharam, national_holiday, day_off in zip(dates, hours, calls, is_ramadan, is_eid, is_moharam, is_national_holiday, is_day_off):
+    for date, hour, call, ramadan, eid, moharam, national_holiday, day_off in zip(dates, hours, calls, is_ramadan, is_eid, is_moharam, is_national_holiday,  is_day_off):
      
         prediction_input = np.array([[hour, call, ramadan, eid, moharam, national_holiday, day_off]]).astype(np.float32)
         prediction_input = prediction_input.reshape(1, 1, prediction_input.shape[1])  # Reshape for sequence input
@@ -87,7 +88,7 @@ new_result = predict_calls_and_agents(new_dates, new_hours, new_calls, new_is_ra
 if not new_result.empty:
     try:
         # Export new results to Excel
-        new_result.to_excel('NewPredictedAgencies.xlsx', index=False)
+        new_result.to_excel('Finnal1403BLSTMPrediction.xlsx', index=False)
         print("New predictions have been saved to 'NewPredictedAgencies.xlsx'")
     except Exception as e:
         print(f"Error saving Excel file: {e}")

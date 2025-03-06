@@ -63,8 +63,8 @@ def calculate_is_national_holiday(gregorian_date_value):
 
 def main():
     # Define input and output file paths
-    input_file_path = 'NewPredictedAgencies.xlsx'
-    output_file_path = '1402PredictedWithFeatures.xlsx'
+    input_file_path = '1402PureWithFeatures.xlsx'
+    output_file_path = '1402To1403ChangeyearAndSetFeatures.xlsx'
 
     # Define specific Hijri dates (month and day) to be marked as religious holidays
     specific_hijri_dates = [
